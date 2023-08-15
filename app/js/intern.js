@@ -41,90 +41,88 @@ var plusPath = 'assets/plus.png';
 var checkPath = 'assets/check.png';
 
 $(document).ready(function() {
-  function formatPrice(price) {
-    return "$" + price.toFixed(2);
-  }
-
   $.ajax({
     url: 'https://goldensneaker.onrender.com/cart/get-all-items', // Địa chỉ endpoint của API GET
     method: 'GET',
     success: function(response) {
       cartItems = response; // Gán dữ liệu từ response cho biến cartItems
       console.log(cartItems); // Dữ liệu đã được gán
-      // Tiếp tục xử lý dữ liệu như bạn muốn
+        $.getJSON('data/shoes.json', function(data) {
+        var shoes = data.shoes;
+
+        // Create the main container
+        var mainContent = $('<div>', { class: classNames.mainContent });
+
+        // Create the products card
+        var productsCard = $('<div>', { class: classNames.card });
+        productsCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
+        productsCard.append($('<div>', { class: classNames.cardTitle }).text('Our Products'));
+
+        var productsCardBody = $('<div>', { class: classNames.cardBody, id: 'product' });
+        console.log('1: ', cartItems.length);
+        // Generate the shoe items
+        for (var i = 0; i < shoes.length; i++) {
+          var shoe = shoes[i];
+          var shopItem = $('<div>', { class: classNames.shopItem, id: shoe.id });
+
+          var shopItemImage = $('<div>', { class: classNames.shopItemImage }).css('background-color', shoe.color);
+          shopItemImage.append($('<img>', { src: shoe.image }));
+
+          var shopItemName = $('<div>', { class: classNames.shopItemName }).text(shoe.name);
+          var shopItemDescription = $('<div>', { class: classNames.shopItemDescription }).text(shoe.description);
+
+          var shopItemBottom = $('<div>', { class: classNames.shopItemBottom });
+          shopItemBottom.append($('<div>', { class: classNames.shopItemPrice }).text('$' + shoe.price.toFixed(2)));
+
+          function createAddToCartHandler(selectedShoe) {
+            return function() {
+              addToCart(selectedShoe);
+            };
+          }
+
+          var addToCartButton = $("<div>")
+            .addClass(classNames.shopItemButton)
+            .addClass(shoe.inCart ? classNames.inactive : "")
+            .on("click", createAddToCartHandler(shoe))
+            .append(
+              shoe.inCart
+                ? $("<div>").addClass(classNames.shopItemButtonCover).append($("<div>").addClass(classNames.shopItemButtonCoverCheckIcon))
+                : $("<p>").text("ADD TO CART")
+            );
+          shopItemBottom.append(addToCartButton);
+
+          shopItem.append(shopItemImage, shopItemName, shopItemDescription, shopItemBottom);
+          productsCardBody.append(shopItem);
+        }
+
+        productsCard.append(productsCardBody);
+
+        var cartCard = $('<div>', { class: classNames.card, id: 'cart' });
+        cartCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
+        cartCard.append($('<div>', { class: classNames.cardTitle }).text('Your cart').append($('<span>', { class: classNames.cardTitleAmount }).text(formatPrice(getTotalCartItemsPrice()))));
+        
+        if (cartItems.length === 0) {
+          renderEmptyCart(cartCard);
+        } else {
+          renderNonEmptyCart(cartCard);
+        }
+
+        mainContent.append(productsCard);
+        mainContent.append(cartCard);
+
+        // Replace the body content with the generated HTML
+        $('#app').html(mainContent);
+        // renderCartItems();
+      });
     },
     error: function(error) {
       console.error('Error:', error);
     }
   });
   
-  $.getJSON('data/shoes.json', function(data) {
-    var shoes = data.shoes;
-
-    // Create the main container
-    var mainContent = $('<div>', { class: classNames.mainContent });
-
-    // Create the products card
-    var productsCard = $('<div>', { class: classNames.card });
-    productsCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
-    productsCard.append($('<div>', { class: classNames.cardTitle }).text('Our Products'));
-
-    var productsCardBody = $('<div>', { class: classNames.cardBody, id: 'product' });
-    console.log(cartItems);
-    // Generate the shoe items
-    for (var i = 0; i < shoes.length; i++) {
-      var shoe = shoes[i];
-      var shopItem = $('<div>', { class: classNames.shopItem, id: shoe.id });
-
-      var shopItemImage = $('<div>', { class: classNames.shopItemImage }).css('background-color', shoe.color);
-      shopItemImage.append($('<img>', { src: shoe.image }));
-
-      var shopItemName = $('<div>', { class: classNames.shopItemName }).text(shoe.name);
-      var shopItemDescription = $('<div>', { class: classNames.shopItemDescription }).text(shoe.description);
-
-      var shopItemBottom = $('<div>', { class: classNames.shopItemBottom });
-      shopItemBottom.append($('<div>', { class: classNames.shopItemPrice }).text('$' + shoe.price.toFixed(2)));
-
-      function createAddToCartHandler(selectedShoe) {
-        return function() {
-          addToCart(selectedShoe);
-        };
-      }
-
-      var addToCartButton = $("<div>")
-        .addClass(classNames.shopItemButton)
-        .addClass(shoe.inCart ? classNames.inactive : "")
-        .on("click", createAddToCartHandler(shoe))
-        .append(
-          shoe.inCart
-            ? $("<div>").addClass(classNames.shopItemButtonCover).append($("<div>").addClass(classNames.shopItemButtonCoverCheckIcon))
-            : $("<p>").text("ADD TO CART")
-        );
-      shopItemBottom.append(addToCartButton);
-
-      shopItem.append(shopItemImage, shopItemName, shopItemDescription, shopItemBottom);
-      productsCardBody.append(shopItem);
-    }
-
-    productsCard.append(productsCardBody);
-
-    var cartCard = $('<div>', { class: classNames.card, id: 'cart' });
-    cartCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
-    cartCard.append($('<div>', { class: classNames.cardTitle }).text('Your cart').append($('<span>', { class: classNames.cardTitleAmount }).text(formatPrice(getTotalCartItemsPrice()))));
-    
-    if (cartItems.length === 0) {
-      renderEmptyCart(cartCard);
-    } else {
-      renderNonEmptyCart(cartCard);
-    }
-
-    mainContent.append(productsCard);
-    mainContent.append(cartCard);
-
-    // Replace the body content with the generated HTML
-    $('#app').html(mainContent);
-    // renderCartItems();
-  });
+  function formatPrice(price) {
+    return "$" + parseFloat(price).toFixed(2);
+  }
 
   function renderShopItem(shoe) {
     var shopItem = $('<div>', { class: classNames.shopItem, id: shoe.id });
@@ -138,10 +136,10 @@ $(document).ready(function() {
     var shopItemBottom = $('<div>', { class: classNames.shopItemBottom });
     shopItemBottom.append($('<div>', { class: classNames.shopItemPrice }).text('$' + shoe.price.toFixed(2)));
 
-    function createAddToCartHandler(selectedShoe) {
-      return function() {
-        addToCart(selectedShoe);
-      };
+      function createAddToCartHandler(selectedShoe) {
+        return function() {
+          addToCart(selectedShoe);
+        };
     }
 
     var addToCartButton = $("<div>")
@@ -285,65 +283,96 @@ $(document).ready(function() {
   function addToCart(item) {
     if (item && !item.inCart) {
       item.inCart = true;
+      item.count = 1;
+      console.log(item);
       var newItem = $.extend({}, item, { count: 1 });
       cartItems.push(newItem);
-      renderShopItem(newItem);
-    }
+      console.log(newItem);
 
-    var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
+      var itemData = {
+        id: 2,
+        name: "Nike Air Zoom Pegasus 36",
+        description: "The iconic Nike Air Zoom Pegasus 36 offers more cooling and mesh that targets breathability across high-heat areas. A slimmer heel collar and tongue reduce bulk, while exposed cables give you a snug fit at higher speeds.",
+        price: 108.97,
+        color: "#e1e7ed",
+        image: "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1315882/air-zoom-pegasus-36-mens-running-shoe-wide-D24Mcz-removebg-preview.png",
+        inCart: true,
+        count: 1
+      };
 
-    var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
-    var cartItemImage = $("<div>")
-      .addClass(classNames.cartItemImage)
-      .css("backgroundColor", item.color)
-      .append($("<div>").addClass(classNames.cartItemImageBlock).append($("<img>").attr("src", item.image)));
+      $.ajax({
+        url: 'https://goldensneaker.onrender.com/cart/add-item', // Địa chỉ endpoint của API POST
+        method: 'POST',
+        data: itemData, // Dữ liệu bạn muốn gửi đi
+        success: function(response) {
+          console.log(response); // Xử lý kết quả trả về từ máy chủ
+          renderShopItem(item);
+          var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
 
-    cartItemLeft.append(cartItemImage);
+          var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
+          var cartItemImage = $("<div>")
+            .addClass(classNames.cartItemImage)
+            .css("backgroundColor", item.color)
+            .append($("<div>").addClass(classNames.cartItemImageBlock).append($("<img>").attr("src", item.image)));
 
-    var cartItemRight = $("<div>").addClass(classNames.cartItemRight);
-    var cartItemName = $("<div>").addClass(classNames.cartItemName).text(item.name);
-    var cartItemPrice = $("<div>").addClass(classNames.cartItemPrice).text(formatPrice(item.price));
+          cartItemLeft.append(cartItemImage);
 
-    var cartItemActions = $("<div>").addClass(classNames.cartItemActions);
-    var cartItemCount = $("<div>").addClass(classNames.cartItemCount);
+          var cartItemRight = $("<div>").addClass(classNames.cartItemRight);
+          var cartItemName = $("<div>").addClass(classNames.cartItemName).text(item.name);
+          var cartItemPrice = $("<div>").addClass(classNames.cartItemPrice).text(formatPrice(item.price));
 
-    var decrementButton = $("<div>")
-      .addClass(classNames.cartItemCountButton)
-      .attr("data-id", item.id)
-      .attr("data-action", "decrement")
-      .text("-");
-    var cartItemCountNumber = $("<div>").addClass(classNames.cartItemCountNumber).text(1);
-    var incrementButton = $("<div>")
-      .addClass(classNames.cartItemCountButton)
-      .attr("data-id", item.id)
-      .attr("data-action", "increment")
-      .text("+");
+          var cartItemActions = $("<div>").addClass(classNames.cartItemActions);
+          var cartItemCount = $("<div>").addClass(classNames.cartItemCount);
 
-    var cartItemRemove = $("<div>")
-      .addClass(classNames.cartItemRemove)
-      .attr("data-id", item.id)
-      .attr("data-action", "pop")
-      .append($('<img>', { src: removePath }));
-    cartItemCount.append(decrementButton, cartItemCountNumber, incrementButton);
+          var decrementButton = $("<div>")
+            .addClass(classNames.cartItemCountButton)
+            .attr("data-id", item.id)
+            .attr("data-action", "decrement")
+            .text("-");
+          var cartItemCountNumber = $("<div>").addClass(classNames.cartItemCountNumber).text(1);
+          var incrementButton = $("<div>")
+            .addClass(classNames.cartItemCountButton)
+            .attr("data-id", item.id)
+            .attr("data-action", "increment")
+            .text("+");
 
-    var cardTitleAmount = $(`.${classNames.cardTitleAmount}`)
-      .text(formatPrice(getTotalCartItemsPrice()));
+          var cartItemRemove = $("<div>")
+            .addClass(classNames.cartItemRemove)
+            .attr("data-id", item.id)
+            .attr("data-action", "pop")
+            .append($('<img>', { src: removePath }));
+          cartItemCount.append(decrementButton, cartItemCountNumber, incrementButton);
 
-    cartItemActions.append(cartItemCount, cartItemRemove);
-    cartItemRight.append(cartItemName, cartItemPrice, cartItemActions);
-    cartItem.append(cartItemLeft, cartItemRight);
+          var cardTitleAmount = $(`.${classNames.cardTitleAmount}`)
+            .text(formatPrice(getTotalCartItemsPrice()));
 
-    if (cartItems.length === 1) {
-      $(`.${classNames.cartEmpty}`).replaceWith(cartItem);
-    }
-    else{
-      $('#cartItem').append(cartItem);
+          cartItemActions.append(cartItemCount, cartItemRemove);
+          cartItemRight.append(cartItemName, cartItemPrice, cartItemActions);
+          cartItem.append(cartItemLeft, cartItemRight);
+
+          if (cartItems.length === 1) {
+            $(`.${classNames.cartEmpty}`).replaceWith(cartItem);
+          }
+          else{
+            $('#cartItem').append(cartItem);
+          }
+
+          renderShopItem(item);
+        },
+        error: function(error) {
+          console.error('Error:', error);
+        }
+      });
+      // var newItem = $.extend({}, item, { count: 1 });
+      // cartItems.push(newItem);
+      // renderShopItem(newItem);
     }
 
     
-    // renderCartItems();
+
+    
     // console.log(cartItems);
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    // localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
 
   function decrement(item) {
@@ -357,7 +386,7 @@ $(document).ready(function() {
       // Remove the cart item from the cartCardBody based on data-id
       $(`[data-id="${item.id}"]`).remove();
     }
-    // console.log(cartItems.length);
+    console.log("2: ", cartItems.length);
     if (cartItems.length === 0) {
       uppdateEmptyCart();
     }

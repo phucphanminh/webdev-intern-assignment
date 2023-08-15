@@ -15,6 +15,7 @@ cartController.getAllItems = async (req, res) => {
 
 cartController.addItem = async (req, res) => {
   const newItem = req.body;
+    console.log('Item added:', newItem);
   try {
     await db.query(`
       INSERT INTO items (id, name, description, color, price, image, inCart, count)
@@ -29,7 +30,6 @@ cartController.addItem = async (req, res) => {
       newItem.inCart,
       newItem.count
     ]);
-    console.log('Item added:', newItem);
     return res.json({ msg: "Item added", data: newItem });
   } catch (error) {
     console.error('Error adding item:', error);
