@@ -286,7 +286,8 @@
 
 .App_cartItem_lfA9I {
     display: flex;
-    padding: 20px 0
+    padding: 20px 0;
+    overflow: hidden
 }
 
 .App_cartItemLeft_1HqDk {

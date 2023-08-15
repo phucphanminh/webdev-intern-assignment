@@ -56,8 +56,8 @@ $(document).ready(function() {
     productsCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
     productsCard.append($('<div>', { class: classNames.cardTitle }).text('Our Products'));
 
-    var productsCardBody = $('<div>', { class: classNames.cardBody });
-
+    var productsCardBody = $('<div>', { class: classNames.cardBody, id: 'product' });
+    console.log(cartItems);
     // Generate the shoe items
     for (var i = 0; i < shoes.length; i++) {
       var shoe = shoes[i];
@@ -94,20 +94,23 @@ $(document).ready(function() {
     }
 
     productsCard.append(productsCardBody);
-    mainContent.append(productsCard);
 
-    // // Create the cart card
-    // var cartCard = $('<div>', { class: classNames.card, id: 'cart' });
-    // cartCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
-    // cartCard.append($('<div>', { class: classNames.cardTitle }).text('Your cart').append($('<span>', { class: classNames.cardTitleAmount }).text(formatPrice(getTotalCartItemsPrice()))));
-    // cartCard.append($('<div>', { class: classNames.cartCardBody })
-    //         .append($('<div>', { class: classNames.cartEmpty })
-    //         .append($('<p>', { class: classNames.cartEmptyText })
-    //         .text('Your cart is empty.'))));
+    var cartCard = $('<div>', { class: classNames.card, id: 'cart' });
+    cartCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
+    cartCard.append($('<div>', { class: classNames.cardTitle }).text('Your cart').append($('<span>', { class: classNames.cardTitleAmount }).text(formatPrice(getTotalCartItemsPrice()))));
+    
+    if (cartItems.length === 0) {
+      renderEmptyCart(cartCard);
+    } else {
+      renderNonEmptyCart(cartCard);
+    }
+
+    mainContent.append(productsCard);
+    mainContent.append(cartCard);
 
     // Replace the body content with the generated HTML
     $('#app').html(mainContent);
-    renderCartItems();
+    // renderCartItems();
   });
 
   function renderShopItem(shoe) {
@@ -141,117 +144,75 @@ $(document).ready(function() {
 
     shopItem.append(shopItemImage, shopItemName, shopItemDescription, shopItemBottom);
     $(`#${shoe.id}`).replaceWith(shopItem);
-}
-
-  // function renderCartItems() {
-  //   $('#cart').remove();
-
-  //   var cartCard = $('<div>', { class: classNames.card, id: 'cart' });
-  //   cartCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
-  //   cartCard.append($('<div>', { class: classNames.cardTitle }).text('Your cart').append($('<span>', { class: classNames.cardTitleAmount }).text(formatPrice(getTotalCartItemsPrice()))));
-  //   if (cartItems.length === 0) {
-  //     cartCard.append($('<div>', { class: classNames.cartCardBody })
-  //             .append($('<div>', { class: classNames.cartEmpty })
-  //             .append($('<p>', { class: classNames.cartEmptyText })
-  //             .text('Your cart is empty.'))));
-      
-  //     // cartCardBody.append($('<div>', { class: classNames.cartEmpty }).append($('<p>', { class: classNames.cartEmptyText }).text('Your cart is empty.')));
-  //   }
-  //   else {
-  //     // console.log('cart +1');
-  //     var cartCardBody = $('<div>', { class: classNames.cartCardBody });
-  //     // console.log(cartItems);
-  //     // var cartItemsList = $("<div>").addClass(classNames.cartItems);
-
-  //     for (var i = 0; i < cartItems.length; i++) {
-  //       var item = cartItems[i];
-  //       var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
-
-  //       var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
-  //       var cartItemImage = $("<div>")
-  //         .addClass(classNames.cartItemImage)
-  //         .css("backgroundColor", item.color)
-  //         .append($("<div>").addClass(classNames.cartItemImageBlock).append($("<img>").attr("src", item.image)));
-
-  //       cartItemLeft.append(cartItemImage);
-
-  //       var cartItemRight = $("<div>").addClass(classNames.cartItemRight);
-  //       var cartItemName = $("<div>").addClass(classNames.cartItemName).text(item.name);
-  //       var cartItemPrice = $("<div>").addClass(classNames.cartItemPrice).text(formatPrice(item.price));
-
-  //       var cartItemActions = $("<div>").addClass(classNames.cartItemActions);
-  //       var cartItemCount = $("<div>").addClass(classNames.cartItemCount);
-
-  //       var decrementButton = $("<div>")
-  //         .addClass(classNames.cartItemCountButton)
-  //         // .addClass(classNames.decrementButton)
-  //         .attr("data-id", item.id)
-  //         .attr("data-action", "decrement")
-  //         .text("-");
-  //       var cartItemCountNumber = $("<div>").addClass(classNames.cartItemCountNumber).text(item.count);
-  //       var incrementButton = $("<div>")
-  //         .addClass(classNames.cartItemCountButton)
-  //         // .addClass(classNames.incrementButton)
-  //         .attr("data-id", item.id)
-  //         .attr("data-action", "increment")
-  //         .text("+");
-        
-  //       var cartItemRemove = $("<div>")
-  //         .addClass(classNames.cartItemRemove)
-  //         .attr("data-id", item.id)
-  //         .attr("data-action", "pop")
-  //         .append($('<img>', { src: removePath}));
-  //       cartItemCount.append(decrementButton, cartItemCountNumber, incrementButton);
-
-  //       var cardTitleAmount = $(`.${classNames.cardTitleAmount}`)
-  //         .text(formatPrice(getTotalCartItemsPrice()));
-
-  //       cartItemActions.append(cartItemCount, cartItemRemove);
-  //       cartItemRight.append(cartItemName, cartItemPrice, cartItemActions);
-  //       cartItem.append(cartItemLeft, cartItemRight);
-
-  //       cartCardBody.append(cartItem);
-  //     }
-  //     // cartCardBody.append(cartItemsList);
-  //     cartCard.append(cartCardBody);
-  //   }
-    
-  //   var mainContent = $(`.${classNames.mainContent}`);
-  //   mainContent.append(cartCard);
-  // }
-
-  function renderCartItems() {
-  $('#cart').remove();
-
-  var cartCard = $('<div>', { class: classNames.card, id: 'cart' });
-  cartCard.append($('<div>', { class: classNames.cardTop }).append($('<img>', { src: logoPath, class: classNames.cardTopLogo })));
-  cartCard.append($('<div>', { class: classNames.cardTitle }).text('Your cart').append($('<span>', { class: classNames.cardTitleAmount }).text(formatPrice(getTotalCartItemsPrice()))));
-
-  if (cartItems.length === 0) {
-    renderEmptyCart(cartCard);
-  } else {
-    renderNonEmptyCart(cartCard);
   }
 
-  var mainContent = $(`.${classNames.mainContent}`);
-  mainContent.append(cartCard);
-}
+  function renderEmptyCart(cartCard) {
+    var cartCardBody = $('<div>', { class: classNames.cardBody, id: 'cartItem' });
+    cartCardBody.append(
+      $('<div>', { class: classNames.cartEmpty }).append(
+        $('<p>', { class: classNames.cartEmptyText }).text('Your cart is empty.')
+      )
+    );
+    cartCard.append(cartCardBody);
+  }
 
-function renderEmptyCart(cartCard) {
-  var cartCardBody = $('<div>', { class: classNames.cartCardBody });
-  cartCardBody.append(
-    $('<div>', { class: classNames.cartEmpty }).append(
-      $('<p>', { class: classNames.cartEmptyText }).text('Your cart is empty.')
-    )
-  );
-  cartCard.append(cartCardBody);
-}
+  function renderNonEmptyCart(cartCard) {
+    var cartCardBody = $('<div>', { class: classNames.cardBody, id: 'cartItem' });
 
-function renderNonEmptyCart(cartCard) {
-  var cartCardBody = $('<div>', { class: classNames.cartCardBody });
+    for (var i = 0; i < cartItems.length; i++) {
+      var item = cartItems[i];
+      var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
 
-  for (var i = 0; i < cartItems.length; i++) {
-    var item = cartItems[i];
+      var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
+      var cartItemImage = $("<div>")
+        .addClass(classNames.cartItemImage)
+        .css("backgroundColor", item.color)
+        .append($("<div>").addClass(classNames.cartItemImageBlock).append($("<img>").attr("src", item.image)));
+
+      cartItemLeft.append(cartItemImage);
+
+      var cartItemRight = $("<div>").addClass(classNames.cartItemRight);
+      var cartItemName = $("<div>").addClass(classNames.cartItemName).text(item.name);
+      var cartItemPrice = $("<div>").addClass(classNames.cartItemPrice).text(formatPrice(item.price));
+
+      var cartItemActions = $("<div>").addClass(classNames.cartItemActions);
+      var cartItemCount = $("<div>").addClass(classNames.cartItemCount);
+
+      var decrementButton = $("<div>")
+        .addClass(classNames.cartItemCountButton)
+        // .addClass(classNames.decrementButton)
+        .attr("data-id", item.id)
+        .attr("data-action", "decrement")
+        .text("-");
+      var cartItemCountNumber = $("<div>").addClass(classNames.cartItemCountNumber).text(item.count);
+      var incrementButton = $("<div>")
+        .addClass(classNames.cartItemCountButton)
+        // .addClass(classNames.incrementButton)
+        .attr("data-id", item.id)
+        .attr("data-action", "increment")
+        .text("+");
+      
+      var cartItemRemove = $("<div>")
+        .addClass(classNames.cartItemRemove)
+        .attr("data-id", item.id)
+        .attr("data-action", "pop")
+        .append($('<img>', { src: removePath}));
+      cartItemCount.append(decrementButton, cartItemCountNumber, incrementButton);
+
+      var cardTitleAmount = $(`.${classNames.cardTitleAmount}`)
+        .text(formatPrice(getTotalCartItemsPrice()));
+
+      cartItemActions.append(cartItemCount, cartItemRemove);
+      cartItemRight.append(cartItemName, cartItemPrice, cartItemActions);
+      cartItem.append(cartItemLeft, cartItemRight);
+
+      cartCardBody.append(cartItem);
+    }
+    // cartCardBody.append(cartItemsList);
+    cartCard.append(cartCardBody);
+  }
+
+  function appendCartItemToCartCardBody(item) {
     var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
 
     var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
@@ -271,23 +232,21 @@ function renderNonEmptyCart(cartCard) {
 
     var decrementButton = $("<div>")
       .addClass(classNames.cartItemCountButton)
-      // .addClass(classNames.decrementButton)
       .attr("data-id", item.id)
       .attr("data-action", "decrement")
       .text("-");
     var cartItemCountNumber = $("<div>").addClass(classNames.cartItemCountNumber).text(item.count);
     var incrementButton = $("<div>")
       .addClass(classNames.cartItemCountButton)
-      // .addClass(classNames.incrementButton)
       .attr("data-id", item.id)
       .attr("data-action", "increment")
       .text("+");
-    
+
     var cartItemRemove = $("<div>")
       .addClass(classNames.cartItemRemove)
       .attr("data-id", item.id)
       .attr("data-action", "pop")
-      .append($('<img>', { src: removePath}));
+      .append($('<img>', { src: removePath }));
     cartItemCount.append(decrementButton, cartItemCountNumber, incrementButton);
 
     var cardTitleAmount = $(`.${classNames.cardTitleAmount}`)
@@ -297,12 +256,18 @@ function renderNonEmptyCart(cartCard) {
     cartItemRight.append(cartItemName, cartItemPrice, cartItemActions);
     cartItem.append(cartItemLeft, cartItemRight);
 
-    cartCardBody.append(cartItem);
+    $(`[data-id="${item.id}"]`).replaceWith(cartItem);
   }
-  // cartCardBody.append(cartItemsList);
-  cartCard.append(cartCardBody);
-}
 
+
+  function uppdateEmptyCart() {
+    var cartEmpty = $('<div>', { class: classNames.cartEmpty });
+    cartEmpty.append(
+        $('<p>', { class: classNames.cartEmptyText }).text('Your cart is empty.')
+    );
+    // Replace the content of #cartCardBody with emptyCartCardBody
+    $('#cartItem').append(cartEmpty);
+  }
 
   function addToCart(item) {
     if (item && !item.inCart) {
@@ -310,14 +275,60 @@ function renderNonEmptyCart(cartCard) {
       var newItem = $.extend({}, item, { count: 1 });
       cartItems.push(newItem);
       renderShopItem(newItem);
-
-      // $(`.${classNames.shopItemButton}[data-id="${item.id}"]`)
-        // .addClass(classNames.inactive)
-      //   .append($('<div>', { class: classNames.shopItemButtonCover }))
-      //   .append($('<div>', { class: classNames.shopItemButtonCoverCheckIcon }));
     }
-  
-    renderCartItems();
+
+    var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
+
+    var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
+    var cartItemImage = $("<div>")
+      .addClass(classNames.cartItemImage)
+      .css("backgroundColor", item.color)
+      .append($("<div>").addClass(classNames.cartItemImageBlock).append($("<img>").attr("src", item.image)));
+
+    cartItemLeft.append(cartItemImage);
+
+    var cartItemRight = $("<div>").addClass(classNames.cartItemRight);
+    var cartItemName = $("<div>").addClass(classNames.cartItemName).text(item.name);
+    var cartItemPrice = $("<div>").addClass(classNames.cartItemPrice).text(formatPrice(item.price));
+
+    var cartItemActions = $("<div>").addClass(classNames.cartItemActions);
+    var cartItemCount = $("<div>").addClass(classNames.cartItemCount);
+
+    var decrementButton = $("<div>")
+      .addClass(classNames.cartItemCountButton)
+      .attr("data-id", item.id)
+      .attr("data-action", "decrement")
+      .text("-");
+    var cartItemCountNumber = $("<div>").addClass(classNames.cartItemCountNumber).text(1);
+    var incrementButton = $("<div>")
+      .addClass(classNames.cartItemCountButton)
+      .attr("data-id", item.id)
+      .attr("data-action", "increment")
+      .text("+");
+
+    var cartItemRemove = $("<div>")
+      .addClass(classNames.cartItemRemove)
+      .attr("data-id", item.id)
+      .attr("data-action", "pop")
+      .append($('<img>', { src: removePath }));
+    cartItemCount.append(decrementButton, cartItemCountNumber, incrementButton);
+
+    var cardTitleAmount = $(`.${classNames.cardTitleAmount}`)
+      .text(formatPrice(getTotalCartItemsPrice()));
+
+    cartItemActions.append(cartItemCount, cartItemRemove);
+    cartItemRight.append(cartItemName, cartItemPrice, cartItemActions);
+    cartItem.append(cartItemLeft, cartItemRight);
+
+    if (cartItems.length === 1) {
+      $(`.${classNames.cartEmpty}`).replaceWith(cartItem);
+    }
+    else{
+      $('#cartItem').append(cartItem);
+    }
+
+    
+    // renderCartItems();
     // console.log(cartItems);
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
@@ -330,20 +341,23 @@ function renderNonEmptyCart(cartCard) {
         return cartItem.id === item.id;
       });
       cartItems.splice(index, 1);
-      // $(`.${classNames.shopItemButton}[data-id="${item.id}"]`)
-      // .empty()
-      // .removeClass(classNames.inactive)
-      // .append($('<p>').text("ADD TO CART"));
+      // Remove the cart item from the cartCardBody based on data-id
+      $(`[data-id="${item.id}"]`).remove();
     }
-
-    renderCartItems();
+    // console.log(cartItems.length);
+    if (cartItems.length === 0) {
+      uppdateEmptyCart();
+    }
+    $(`[data-id="${item.id}"] .${classNames.cartItemRight} .${classNames.cartItemActions} .${classNames.cartItemCount} .${classNames.cartItemCountNumber}`).text(item.count);
+    $(`.${classNames.cardTitleAmount}`)
+      .text(formatPrice(getTotalCartItemsPrice()));
     renderShopItem(item);
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
 
   function increment(item) {
     item.count++;
-    renderCartItems();
+    appendCartItemToCartCardBody(item);
     renderShopItem(item);
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
@@ -355,7 +369,12 @@ function renderNonEmptyCart(cartCard) {
       return cartItem.id === item.id;
     });
     cartItems.splice(index, 1);
-    renderCartItems();
+    $(`[data-id="${item.id}"]`).remove();
+    if (cartItems.length === 0) {
+      uppdateEmptyCart();
+    }
+    $(`.${classNames.cardTitleAmount}`)
+      .text(formatPrice(getTotalCartItemsPrice()));
     renderShopItem(item);
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
