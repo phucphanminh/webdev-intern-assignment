@@ -11,15 +11,11 @@ const db = pgp(connectionString);
 
 app.use(bodyParser.json());
 
-// Tạo schema và bảng
-app.get('/create-schema-and-table', (req, res) => {
-  db.connect()
-    .then(obj => {
-      return obj.none(`
-        CREATE SCHEMA IF NOT EXISTS goldensneaker;
-        SET search_path TO goldensneaker;
-        CREATE TABLE IF NOT EXISTS items (
-          id SERIAL PRIMARY KEY,
+db.connect()
+  .then(obj => {
+    return obj.none(`
+      CREATE TABLE IF NOT EXISTS items (
+          id INT PRIMARY KEY,
           name VARCHAR(255),
           description TEXT,
           color VARCHAR(7),
@@ -29,14 +25,28 @@ app.get('/create-schema-and-table', (req, res) => {
           count INT
         );
       `);
-    })
-    .then(() => {
-      console.log('Schema and table created');
-      res.send('Schema and table created');
+  })
+  .then(() => {
+    console.log('Talbe created or already exists');
+    // Tiếp tục với việc tạo bảng và các yêu cầu khác
+  })
+  .catch(error => {
+    console.error('Error creating schema:', error);
+    res.status(500).send('Error creating schema');
+  });
+
+// Lấy tất cả các mục từ bảng items
+app.get('/get-all-items', (req, res) => {
+  db.any(`
+    SELECT * FROM items;
+  `)
+    .then(items => {
+      console.log('All items:', items);
+      res.json(items);
     })
     .catch(error => {
-      console.error('Error connecting to database:', error);
-      res.status(500).send('Error connecting to database');
+      console.error('Error getting items:', error);
+      res.status(500).send('Error getting items');
     });
 });
 
@@ -44,9 +54,10 @@ app.get('/create-schema-and-table', (req, res) => {
 app.post('/add-item', (req, res) => {
   const newItem = req.body;
   db.none(`
-    INSERT INTO items (name, description, color, price, image, inCart, count)
-    VALUES ($1, $2, $3, $4, $5, $6, $7);
+    INSERT INTO items (id, name, description, color, price, image, inCart, count)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
   `, [
+    newItem.id,
     newItem.name,
     newItem.description,
     newItem.color,
@@ -66,16 +77,15 @@ app.post('/add-item', (req, res) => {
 });
 
 // Cập nhật số lượng (count) của một mục trong bảng items
-app.put('/update-count/:itemId', (req, res) => {
-  const itemId = req.params.itemId;
-  const newCount = req.body.count;
+app.put('/update-count', (req, res) => {
+  const updateInfo = req.body;
   db.none(`
     UPDATE items
     SET count = $1
     WHERE id = $2;
-  `, [newCount, itemId])
+  `, [updateInfo.count, updateInfo.id])
     .then(() => {
-      console.log('Item count updated:', itemId, newCount);
+      console.log('Item count updated:', updateInfo.id, updateInfo.count);
       res.send('Item count updated');
     })
     .catch(error => {
@@ -102,7 +112,7 @@ app.delete('/delete-item/:itemId', (req, res) => {
 });
 
 // Khởi động ứng dụng
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
