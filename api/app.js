@@ -6,7 +6,7 @@ const app = express();
 
 // Kết nối với cơ sở dữ liệu PostgreSQL
 const ssl = { rejectUnauthorized: false };
-const connectionString = "postgres://pmp:iqzIILYhcnXGzq26JzZcIq7XTjLT8B2v@dpg-cjds04gq339s73f3v16g-a.singapore-postgres.render.com/goldensneaker?ssl=true";
+const connectionString = "postgres://pmp:iqzIILYhcnXGzq26JzZcIq7XTjLT8B2v@dpg-cjds04gq339s73f3v16g-a.singapore-postgres.render.com:5432/goldensneaker?ssl=true";
 const db = pgp(connectionString);
 
 app.use(bodyParser.json());
@@ -111,8 +111,8 @@ app.delete('/delete-item/:itemId', (req, res) => {
     });
 });
 
-// Khởi động ứng dụng
-const port = process.env.PORT || 10000;
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+// // Khởi động ứng dụng
+// const port = process.env.PORT || 10000;
+// app.listen(port, () => {
+//   console.log(`Server is running on http://localhost:${port}`);
+// });
