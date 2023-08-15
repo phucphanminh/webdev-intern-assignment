@@ -1,9 +1,12 @@
-DROP SCHEMA IF EXISTS goldensneaker;
-CREATE SCHEMA goldensneaker;
-USE goldensneaker;
+-- Create schema if not exists
+CREATE SCHEMA IF NOT EXISTS goldensneaker;
 
+-- Switch to the created schema
+SET search_path TO goldensneaker;
+
+-- Create table items
 CREATE TABLE items (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   name VARCHAR(255),
   description TEXT,
   color VARCHAR(7),
@@ -12,4 +15,3 @@ CREATE TABLE items (
   inCart BOOLEAN,
   count INT
 );
-
