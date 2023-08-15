@@ -14,23 +14,14 @@ cartController.getAllItems = async (req, res) => {
 };
 
 cartController.addItem = async (req, res) => {
-  const newItem = req.body;
-    console.log('Item added:', newItem);
+  const { id, name, description, color, price, image, inCart, count } = req.body;
+    console.log('Item added:', req.body);
   try {
     await db.query(`
       INSERT INTO items (id, name, description, color, price, image, inCart, count)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
-    `, [
-      newItem.id,
-      newItem.name,
-      newItem.description,
-      newItem.color,
-      newItem.price,
-      newItem.image,
-      newItem.inCart,
-      newItem.count
-    ]);
-    return res.json({ msg: "Item added", data: newItem });
+    `, [ id, name, description, color, price, image, inCart, count ]);
+    return res.json({ msg: "Item added"});
   } catch (error) {
     console.error('Error adding item:', error);
     res.status(500).json({ msg: "Error adding item", error: error.message });
@@ -38,14 +29,14 @@ cartController.addItem = async (req, res) => {
 };
 
 cartController.updateCount = async (req, res) => {
-  const updateInfo = req.body;
+  const { id, count } = req.body;
   try {
     await db.query(`
       UPDATE items
       SET count = $1
       WHERE id = $2;
-    `, [updateInfo.count, updateInfo.id]);
-    console.log('Item count updated:', updateInfo.id, updateInfo.count);
+    `, [count, id]);
+    console.log('Item count updated:', id, count);
     return res.json({ msg: "Item count updated" });
   } catch (error) {
     console.error('Error updating item count:', error);

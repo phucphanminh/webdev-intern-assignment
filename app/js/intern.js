@@ -283,30 +283,20 @@ $(document).ready(function() {
   function addToCart(item) {
     if (item && !item.inCart) {
       item.inCart = true;
-      item.count = 1;
-      console.log(item);
+      // item.count = 1;
+      // console.log(item);
       var newItem = $.extend({}, item, { count: 1 });
       cartItems.push(newItem);
       console.log(newItem);
 
-      var itemData = {
-        id: 2,
-        name: "Nike Air Zoom Pegasus 36",
-        description: "The iconic Nike Air Zoom Pegasus 36 offers more cooling and mesh that targets breathability across high-heat areas. A slimmer heel collar and tongue reduce bulk, while exposed cables give you a snug fit at higher speeds.",
-        price: 108.97,
-        color: "#e1e7ed",
-        image: "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1315882/air-zoom-pegasus-36-mens-running-shoe-wide-D24Mcz-removebg-preview.png",
-        inCart: true,
-        count: 1
-      };
-
       $.ajax({
-        url: 'https://goldensneaker.onrender.com/cart/add-item', // Địa chỉ endpoint của API POST
+        url: 'https://localhost:10000/cart/add-item', // Địa chỉ endpoint của API POST
         method: 'POST',
-        data: itemData, // Dữ liệu bạn muốn gửi đi
+        data: newItem, // Dữ liệu bạn muốn gửi đi
+        contentType: "application/json",
         success: function(response) {
           console.log(response); // Xử lý kết quả trả về từ máy chủ
-          renderShopItem(item);
+          renderShopItem(newItem);
           var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
 
           var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
@@ -356,8 +346,6 @@ $(document).ready(function() {
           else{
             $('#cartItem').append(cartItem);
           }
-
-          renderShopItem(item);
         },
         error: function(error) {
           console.error('Error:', error);
