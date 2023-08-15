@@ -33,7 +33,7 @@ var classNames = {
     cartItemImageBlock: "App_cartItemImageBlock_wRE4E"
 };
 
-var cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+var cartItems = [];
 var logoPath = 'assets/nike.png';
 var removePath = 'assets/trash.png';
 var minusPath = 'assets/minus.png';
@@ -44,6 +44,19 @@ $(document).ready(function() {
   function formatPrice(price) {
     return "$" + price.toFixed(2);
   }
+
+  $.ajax({
+    url: 'https://goldensneaker.onrender.com/cart/get-all-items', // Địa chỉ endpoint của API GET
+    method: 'GET',
+    success: function(response) {
+      cartItems = response; // Gán dữ liệu từ response cho biến cartItems
+      console.log(cartItems); // Dữ liệu đã được gán
+      // Tiếp tục xử lý dữ liệu như bạn muốn
+    },
+    error: function(error) {
+      console.error('Error:', error);
+    }
+  });
   
   $.getJSON('data/shoes.json', function(data) {
     var shoes = data.shoes;
