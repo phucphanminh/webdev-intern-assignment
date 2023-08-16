@@ -46,7 +46,7 @@ $(document).ready(function() {
     method: 'GET',
     success: function(response) {
       cartItems = response; // Gán dữ liệu từ response cho biến cartItems
-      console.log(cartItems); // Dữ liệu đã được gán
+      // console.log(cartItems); // Dữ liệu đã được gán
         $.getJSON('data/shoes.json', function(data) {
         var shoes = data.shoes;
 
@@ -59,7 +59,7 @@ $(document).ready(function() {
         productsCard.append($('<div>', { class: classNames.cardTitle }).text('Our Products'));
 
         var productsCardBody = $('<div>', { class: classNames.cardBody, id: 'product' });
-        console.log('1: ', cartItems.length);
+        // console.log('1: ', cartItems.length);
         // Generate the shoe items
         for (var i = 0; i < shoes.length; i++) {
           var shoe = shoes[i];
@@ -79,13 +79,14 @@ $(document).ready(function() {
               addToCart(selectedShoe);
             };
           }
-
+          var hasId = cartItems.some(item => item.id === shoe.id);
+          // console.log(hasId);
           var addToCartButton = $("<div>")
             .addClass(classNames.shopItemButton)
-            .addClass(shoe.inCart ? classNames.inactive : "")
+            .addClass(hasId ? classNames.inactive : "")
             .on("click", createAddToCartHandler(shoe))
             .append(
-              shoe.inCart
+              hasId
                 ? $("<div>").addClass(classNames.shopItemButtonCover).append($("<div>").addClass(classNames.shopItemButtonCoverCheckIcon))
                 : $("<p>").text("ADD TO CART")
             );
@@ -134,7 +135,7 @@ $(document).ready(function() {
     var shopItemDescription = $('<div>', { class: classNames.shopItemDescription }).text(shoe.description);
 
     var shopItemBottom = $('<div>', { class: classNames.shopItemBottom });
-    shopItemBottom.append($('<div>', { class: classNames.shopItemPrice }).text('$' + shoe.price.toFixed(2)));
+    shopItemBottom.append($('<div>', { class: classNames.shopItemPrice }).text(formatPrice(shoe.price)));
 
       function createAddToCartHandler(selectedShoe) {
         return function() {
@@ -172,6 +173,7 @@ $(document).ready(function() {
 
     for (var i = 0; i < cartItems.length; i++) {
       var item = cartItems[i];
+      
       var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
 
       var cartItemLeft = $("<div>").addClass(classNames.cartItemLeft);
@@ -287,15 +289,15 @@ $(document).ready(function() {
       // console.log(item);
       var newItem = $.extend({}, item, { count: 1 });
       cartItems.push(newItem);
-      console.log(newItem);
+      // console.log(newItem);
 
       $.ajax({
-        url: 'https://localhost:10000/cart/add-item', // Địa chỉ endpoint của API POST
+        url: 'https://goldensneaker.onrender.com/cart/add-item', // Địa chỉ endpoint của API POST
         method: 'POST',
-        data: newItem, // Dữ liệu bạn muốn gửi đi
+        data: JSON.stringify(newItem), // Dữ liệu bạn muốn gửi đi
         contentType: "application/json",
         success: function(response) {
-          console.log(response); // Xử lý kết quả trả về từ máy chủ
+          // console.log(response); // Xử lý kết quả trả về từ máy chủ
           renderShopItem(newItem);
           var cartItem = $("<div>").addClass(classNames.cartItem).attr("data-id", item.id);
 
@@ -351,65 +353,158 @@ $(document).ready(function() {
           console.error('Error:', error);
         }
       });
-      // var newItem = $.extend({}, item, { count: 1 });
-      // cartItems.push(newItem);
-      // renderShopItem(newItem);
     }
-
-    
-
-    
-    // console.log(cartItems);
-    // localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
 
   function decrement(item) {
     item.count = Math.max(0, item.count - 1);
+    console.log('max: ', item.count);
     if (item.count === 0) {
-      item.inCart = false;
-      var index = cartItems.findIndex(function(cartItem) {
-        return cartItem.id === item.id;
+      pop(item);
+      // $.ajax({
+      //   url: `https://goldensneaker.onrender.com/cart/delete-item/${item.id}`,
+      //   method: 'DELETE',
+      //   success: function(response) {
+      //     // Remove the cart item from the cartCardBody based on data-id
+      //     $(`[data-id="${item.id}"]`).remove();
+
+      //     // Perform the GET request to update cartItems
+      //     $.ajax({
+      //       url: 'https://goldensneaker.onrender.com/cart/get-all-items',
+      //       method: 'GET',
+      //       success: function(response) {
+      //         cartItems = response;
+      //         console.log('items-d: ', cartItems);
+      //         // Update UI based on updated cartItems
+      //         if (cartItems.length === 0) {
+      //           uppdateEmptyCart();
+      //         }
+
+      //         // Update total amount
+      //         $(`.${classNames.cardTitleAmount}`).text(formatPrice(getTotalCartItemsPrice()));
+
+      //         // Render shop item
+      //         renderShopItem(item);
+      //       },
+      //       error: function(error) {
+      //         console.error('Error:', error);
+      //       }
+      //     });
+      //   },
+      //   error: function(error) {
+      //     console.error('Error:', error);
+      //   }
+      // });
+    } 
+    else{
+      const updatedItem = {
+        id: item.id,
+        count: item.count
+      };
+
+      $.ajax({
+        url: 'https://goldensneaker.onrender.com/cart/update-count',
+        method: 'PUT',
+        data: JSON.stringify(updatedItem), // Dữ liệu bạn muốn gửi đi
+        contentType: "application/json",
+        success: function(response) {
+          $(`[data-id="${item.id}"] .${classNames.cartItemRight} .${classNames.cartItemActions} .${classNames.cartItemCount} .${classNames.cartItemCountNumber}`).text(item.count);
+
+          // Perform the GET request to update cartItems
+          $.ajax({
+            url: 'https://goldensneaker.onrender.com/cart/get-all-items',
+            method: 'GET',
+            success: function(response) {
+              cartItems = response;
+              console.log('items-u: ', cartItems);
+              // Update UI based on updated cartItems
+              if (cartItems.length === 0) {
+                uppdateEmptyCart();
+              }
+
+              // Update total amount
+              $(`.${classNames.cardTitleAmount}`).text(formatPrice(getTotalCartItemsPrice()));
+
+              // Render shop item
+              renderShopItem(item);
+            },
+            error: function(error) {
+              console.error('Error:', error);
+            }
+          });
+        },
+        error: function(error) {
+          console.error('Error:', error);
+        }
       });
-      cartItems.splice(index, 1);
-      // Remove the cart item from the cartCardBody based on data-id
-      $(`[data-id="${item.id}"]`).remove();
     }
-    console.log("2: ", cartItems.length);
-    if (cartItems.length === 0) {
-      uppdateEmptyCart();
-    }
-    $(`[data-id="${item.id}"] .${classNames.cartItemRight} .${classNames.cartItemActions} .${classNames.cartItemCount} .${classNames.cartItemCountNumber}`).text(item.count);
-    $(`.${classNames.cardTitleAmount}`)
-      .text(formatPrice(getTotalCartItemsPrice()));
-    renderShopItem(item);
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
+
 
   function increment(item) {
     item.count++;
-    appendCartItemToCartCardBody(item);
-    renderShopItem(item);
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    var updatedItem = {};
+    updatedItem.id = item.id;
+    updatedItem.count = item.count; 
+    $.ajax({
+      url: 'https://goldensneaker.onrender.com/cart/update-count', // Địa chỉ endpoint của API PUT
+      method: 'PUT',
+      data: JSON.stringify(updatedItem), // Dữ liệu bạn muốn gửi đi
+      contentType: "application/json", 
+      success: function(response) {
+        // console.log(response); // Xử lý kết quả trả về từ máy chủ
+        appendCartItemToCartCardBody(item);
+        renderShopItem(item);
+      },
+      error: function(error) {
+        console.error('Error:', error);
+      }
+    });
   }
 
   function pop(item) {
     item.count = 0;
     item.inCart = false;
-    var index = cartItems.findIndex(function(cartItem) {
-      return cartItem.id === item.id;
+
+    // Step 1: Perform the DELETE request
+    $.ajax({
+      url: `https://goldensneaker.onrender.com/cart/delete-item/${item.id}`,
+      method: 'DELETE',
+      success: function(response) {
+        // Remove the cart item from the cartCardBody based on data-id
+        $(`[data-id="${item.id}"]`).remove();
+        
+        // Step 2: Perform the GET request to update cartItems
+        $.ajax({
+          url: 'https://goldensneaker.onrender.com/cart/get-all-items',
+          method: 'GET',
+          success: function(response) {
+            cartItems = response;
+            
+            // Update UI based on updated cartItems
+            if (cartItems.length === 0) {
+              uppdateEmptyCart();
+            }
+            
+            // Update total amount
+            $(`.${classNames.cardTitleAmount}`).text(formatPrice(getTotalCartItemsPrice()));
+            
+            // Render shop item
+            renderShopItem(item);
+          },
+          error: function(error) {
+            console.error('Error:', error);
+          }
+        });
+      },
+      error: function(error) {
+        console.error('Error:', error);
+      }
     });
-    cartItems.splice(index, 1);
-    $(`[data-id="${item.id}"]`).remove();
-    if (cartItems.length === 0) {
-      uppdateEmptyCart();
-    }
-    $(`.${classNames.cardTitleAmount}`)
-      .text(formatPrice(getTotalCartItemsPrice()));
-    renderShopItem(item);
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
 
   function getTotalCartItemsPrice() {
+    console.log(cartItems.length);
     var total = 0;
     for (var i = 0; i < cartItems.length; i++) {
       var item = cartItems[i];
